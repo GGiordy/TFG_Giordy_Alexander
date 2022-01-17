@@ -35,7 +35,7 @@
     private:
     
   // ARDUINO CLOUD_IOT PRIVATE VARIABLES
-    const char* computerIP       = "62.83.60.175";         // ENTER YOUR COMPUTER'S IP BETWEEN QUOTES
+    const char* computerIP       = "";         // ENTER YOUR COMPUTER'S IP BETWEEN QUOTES
     const unsigned int RPMPort   = 65013; // Destination Ports
     const unsigned int PosPort   = 65014;
     const unsigned int LoadPort  = 65015;
