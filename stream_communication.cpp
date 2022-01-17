@@ -15,8 +15,8 @@
     Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
     
-    const char ssid[]     = "Android_Giordy";    // Network SSID (name)
-    const char pass[]     = "mobile98";          // Network password (use for WPA, or use as key for WEP)
+    const char ssid[]     = "";    // Network SSID (name)
+    const char pass[]     = "";          // Network password (use for WPA, or use as key for WEP)
     int status = WL_IDLE_STATUS;
     
     WiFiSSLClient client;             // Instantiate the Wifi client
