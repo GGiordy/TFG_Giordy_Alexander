@@ -36,7 +36,7 @@
       uint8_t analog_pin,opt1_pin,opt2_pin;
     
    // FFT PRIVATE VARIABLES
-      const double freq_offset     = 0.2;             // Minimal freq = 20Hz
+      const double high_pass_filter = 5;             //Hz     
 
       
    // ANALOG READ PRIVATE VARIABLES   

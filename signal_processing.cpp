@@ -28,15 +28,15 @@
     }
     
     void Signal::scale_value(double data){
-         if (scale == 1 && data > 1.5){
+         if (scale == 1 && data >= 1.5){
             digitalWrite(opt1_pin,LOW);
             digitalWrite(opt2_pin,HIGH);
-            scale = 2;
+            scale = 2;                    //Vread=Vin/2
          }
         if (scale == 2 && data < 0.5){
             digitalWrite(opt1_pin,HIGH);
             digitalWrite(opt2_pin,LOW);
-            scale = 1;
+            scale = 1;                    //Vread=Vin
         }
     }
     
@@ -50,19 +50,16 @@
 
 ///////////////////////////////   FFT FUNCTIONS  ////////////////////////////////////////////////    
     double Signal::frequency_meter(){ 
-         // High pass filter
-         if (maior >= 0.2){
-            FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-            FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
-            FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
-            FFT.DCRemoval(vReal, SAMPLES);
-            freq = FFT.MajorPeak(vReal, SAMPLES, sample_rate);
-            return freq;
-         }
-         else{
-            freq = 0;
-            return freq;
-         }
+           FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+           FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
+           FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
+           FFT.DCRemoval(vReal, SAMPLES);
+           freq = FFT.MajorPeak(vReal, SAMPLES, sample_rate);
+           // High pass filter
+           if (freq < high_pass_filter){      
+               freq = 0;
+           }
+           return freq;
     }
            
 

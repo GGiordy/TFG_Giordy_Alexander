@@ -7,13 +7,13 @@
 
     const double RPM_min               = 100;              // Minimal RPM = 100
     const double RPM_optim             = 500;              // Wanted RPM = 300
-    const double RPM_range             = 50;              // Max RPM range to pitch control
+    const double RPM_range             = 0.2*RPM_optim;    // Max RPM range to pitch control
     const long T_control               = 500000;           // microseconds (min = 420 milliseconds)
     const long stop_delay              = 10000;            // Stop delay milliseconds
     inline boolean emergency_stop      = false;
     inline long loop_time_control      = 0;
     inline long loop_time_stop         = 0;
-    inline int help = 1;
+
     
     class Pitch {
     public:
@@ -33,6 +33,7 @@
       double pitch_control(double RPM_read, double prev_RPM_read);
       double pitch_stop();
       void   pitch_safe_write(double calculated_pos);
+      double mapf(double x, double in_min, double in_max, double out_min, double out_max);
       
     private:
       
@@ -45,6 +46,7 @@
       const double pos_max      = 90.0;
       const double pos_optim    = 80.0;   
       const double pos_min      = 45.0; 
+      double local_pos          = pos;
       double ymin               = 0.25; 
       double ymax               = -0.25;
 
@@ -70,6 +72,7 @@
       
    // LOAD CONTROL PRIVATE VARIABLES
       uint8_t r1_pin, r2_pin,r3_pin,r4_pin;
+      double local_state=0;
       const double Load_P_gain  = 0.003;
       const double Load_D1_gain = 0.01;
       const double Load_D2_gain = 0.01;

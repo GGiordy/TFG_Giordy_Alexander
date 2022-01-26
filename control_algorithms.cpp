@@ -26,52 +26,56 @@
          if (y>0 && y<=ymin){
             pos = pos_optim - (pos_optim - pos_min)*(y/ymin);
             pitch_safe_write(pos);
-            return pos;
           }
     
          if (y<0 && y>=ymax){
             pos = pos_optim + (pos_max - pos_optim)*(y/ymax);
             pitch_safe_write(pos);
-            return pos;
           }
+          return mapf(pos,pos_min,pos_max,pos_min,0);
     }
 
     double Pitch::pitch_initial(){
            pos = pos_min;
            pitch_safe_write(pos_min);
-           return pos;
+           return mapf(pos,pos_min,pos_max,pos_min,0);
     }
     
     double Pitch::pitch_start(){
-           pos = alpha*pos +(1-alpha)*((pos_optim+pos_max)/2); 
+           pos = alpha*pos +(1-alpha)*((pos_optim)); 
            pitch_safe_write(pos);
-
-           return pos;
+           return mapf(pos,pos_min,pos_max,pos_min,0);
     }
     
     double Pitch::pitch_control(double RPM_read, double prev_RPM_read){
            
-           if (RPM_read >= prev_RPM_read && pos > pos_min){
-              pos = pos +(RPM_optim - RPM_read)*Pitch_P_gain - ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Pitch_D_gain -((RPM_read - prev_RPM_read)*(T_control*1e-6))*Pitch_I_gain;
-              pitch_safe_write(pos);
+           if (RPM_read >= prev_RPM_read){
+              local_pos = pos +(RPM_optim - RPM_read)*Pitch_P_gain - ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Pitch_D_gain -((RPM_read - prev_RPM_read)*(T_control*1e-6))*Pitch_I_gain;
+              if (local_pos >= pos_min){
+                  pos = local_pos;
+                  pitch_safe_write(pos);
+              }
            }
-           if (RPM_read < prev_RPM_read && pos < pos_max){
-              pos = pos +(RPM_optim - RPM_read)*Pitch_P_gain - ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Pitch_D_gain -((RPM_read - prev_RPM_read)*(T_control*1e-6))*Pitch_I_gain;
-              pitch_safe_write(pos);
+           if (RPM_read < prev_RPM_read){
+              local_pos = pos +(RPM_optim - RPM_read)*Pitch_P_gain - ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Pitch_D_gain -((RPM_read - prev_RPM_read)*(T_control*1e-6))*Pitch_I_gain;
+              if (local_pos <= pos_max){
+                  pos = local_pos;
+                  pitch_safe_write(pos);
+              }
            }
-           return pos;
+           return mapf(pos,pos_min,pos_max,pos_min,0);
     }
        
     double Pitch::pitch_stop(){
            if ((millis() - loop_time_stop) < stop_delay){
               pos = pos_max;
               pitch_safe_write(pos);
-              return pos;
+              return mapf(pos,pos_min,pos_max,pos_min,0);
               }
            else{
               loop_time_stop = 0;
               emergency_stop = false;
-              return pos;
+              return mapf(pos,pos_min,pos_max,pos_min,0);
            }
     }
 
@@ -81,6 +85,11 @@
           }
      }
 
+     double Pitch::mapf(double x, double in_min, double in_max, double out_min, double out_max){
+     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+     }
+     
+
 
 ///////////////////////////////   LOAD CONTROL  ////////////////////////////////////////////////
     
@@ -89,13 +98,13 @@
           r2_pin = _r2_pin;
           r3_pin = _r3_pin;
           r4_pin = _r4_pin;                            
-          pinMode(r1_pin,OUTPUT);
-          pinMode(r2_pin,OUTPUT);
-          pinMode(r3_pin,OUTPUT);
-          pinMode(r4_pin,OUTPUT);
     }
 
     void Load::setup_relay(){
+         pinMode(r1_pin,OUTPUT);
+         pinMode(r2_pin,OUTPUT);
+         pinMode(r3_pin,OUTPUT);
+         pinMode(r4_pin,OUTPUT);
          relay(load_state = 0);
     }
     
@@ -246,25 +255,40 @@
 
         
     double Load::relay_switch(double RPM_read, double prev_RPM_read){
-           if (RPM_read > RPM_optim + RPM_range && load_state < 16){
-              load_state = load_state -(RPM_optim - RPM_read)*Load_P_gain - ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D2_gain;
+           if (RPM_read > RPM_optim + RPM_range){
+              local_state = load_state -(RPM_optim - RPM_read)*Load_P_gain + ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D2_gain;
+              if( local_state  <= 16){
+                  load_state = local_state;
+              } 
            }
-           if (RPM_read < RPM_optim - RPM_range && load_state > 0){
-              load_state = load_state -(RPM_optim - RPM_read)*Load_P_gain - ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D2_gain;
+           if (RPM_read < RPM_optim - RPM_range){
+              local_state = load_state -(RPM_optim - RPM_read)*Load_P_gain + ((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D2_gain;
+              if ( local_state >= 0){
+                   load_state = local_state;
+              }
            }
            return load_state;
     }
     
     double Load::relay_start(double RPM_read, double prev_RPM_read){
-           if (RPM_read > prev_RPM_read && load_state < 16){
-              load_state = load_state +((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D1_gain; //D control
+           if (RPM_read > prev_RPM_read){
+              local_state = load_state +((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D1_gain; //D control
+              if( local_state  <= 16){
+                  load_state = local_state;
+              } 
            }
-           if (RPM_read < prev_RPM_read && load_state > 0){
-              load_state = load_state +((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D1_gain; //D control
+           if (RPM_read <= prev_RPM_read){
+              local_state = load_state +((RPM_read - prev_RPM_read)/(T_control*1e-6))*Load_D1_gain; //D control
+              if ( local_state >= 0){ 
+                   load_state = local_state;
+              }
            }
            return load_state;      
     }
-    
-    
+
+
+
+
+
 
     

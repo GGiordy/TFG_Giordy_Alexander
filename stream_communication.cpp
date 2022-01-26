@@ -15,15 +15,14 @@
     Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
     
-    const char ssid[]     = "";    // Network SSID (name)
-    const char pass[]     = "";          // Network password (use for WPA, or use as key for WEP)
+    const char ssid[]     = "Android_Giordy";    // Network SSID (name)
+    const char pass[]     = "mobile98";          // Network password (use for WPA, or use as key for WEP)
     int status = WL_IDLE_STATUS;
     
     WiFiSSLClient client;             // Instantiate the Wifi client
 
     // UDP Variables
     unsigned int localPort = 2390;        // local port to listen on
-    const char* computerIP = " ";         // ENTER YOUR COMPUTER'S IP BETWEEN QUOTES
     WiFiUDP Udp;
     
 
@@ -31,11 +30,11 @@
     }
     void Data::setup_communications(){
          display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
+         Display(0,0,0,0);
       // Connect to wifi
          status = WiFi.begin(ssid, pass);
          Udp.begin(localPort);       
-         delay(500);
-         Display(0,0,0,0);
+         delay(1000);
     }
 
 /* A lot of latency
@@ -90,11 +89,11 @@
          display.print("P: "); display.print(power_wind);display.println("mW");
           
          display.setTextColor(SSD1306_WHITE); // Draw 'inverse' text
-         display.print("Pitch angle: ");display.println(pos_wind);
+         display.print("Pitch angle: ");display.print(int(pos_wind));display.println(" deg");
           
          display.setTextSize(2);             // Draw 2X-scale text
          display.setTextColor(SSD1306_WHITE);
-         display.print("RPM:"); display.println(RPM_wind);
+         display.print("RPM:"); display.println(int(RPM_wind));
         
          display.display();
       }

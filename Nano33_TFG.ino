@@ -17,8 +17,6 @@
 
     uint8_t pitch_pin_select   = 2;
 
-    long time1 = 0;
-
     typedef struct{
     double RPM;
     double prev_RPM;
@@ -57,20 +55,17 @@
          }
            
          while (out_data.RPM > RPM_optim - RPM_range && out_data.RPM < RPM_optim + RPM_range ){
-               pitch_control_state(&out_data);
-               //marine_control_state();
+               pitch_control_state(&out_data);  // or marine_control_state();
          }
          
-         while (((out_data.RPM < RPM_optim - RPM_range) ||(out_data.RPM > RPM_optim + RPM_range) ) && out_data.RPM > RPM_min){
+         while (((out_data.RPM < RPM_optim - RPM_range) ||(out_data.RPM > RPM_optim + RPM_range) )&& out_data.RPM > RPM_min){
                load_control_state(&out_data);
                while (emergency_stop == true){
-                     emergency_stop_state(&out_data);
+                      emergency_stop_state(&out_data);
                 }
-         }
-
-         
-           
+         }           
     }
+
 
     void initial_state( out_data_t* out ){
          out->state      = 0; 
@@ -78,9 +73,10 @@
              Signal.read_signal(i);  
              Data.serial_stream( out->RPM, out->pos, out->load_state, out->P );
          }
+         
          out->RPM        = Signal.frequency_meter()*10;  // RPM_TURBINE = 60* (F(Hz)/(Number_of_poles = 6))
          out->pos        = Pitch.pitch_initial();
-        // out->load_state = round (Load.relay_switch( out->RPM , out->prev_RPM));
+         out->load_state = round (Load.relay_switch( out->RPM , out->prev_RPM));
          out->R          = Load.relay( out->load_state );
          out->P          = Signal.power_meter( out->R );
          out->prev_RPM   = out->RPM;                     //IMPORTANT!!
@@ -97,6 +93,7 @@
              Signal.read_signal(i); 
              Data.serial_stream( out->RPM, out->pos, out->load_state, out->P );
          }
+         
          out->RPM        = Signal.frequency_meter()*10;  // RPM_TURBINE = 60* (F(Hz)/(Number_of_poles = 6))
          out->pos        = Pitch.pitch_start();
          out->load_state = round (Load.relay_start( out->RPM , out->prev_RPM));
@@ -106,7 +103,7 @@
          control_sample_rate_regulation();
          
 
-         Data.Display     ( out->RPM, out->pos, out->load_state, out->P );
+         Data.Display     ( out->RPM, out->pos, out->load_state, out->P);
          Data.update_IOT   ( out->RPM, out->pos, out->load_state, out->state);
     }
      
@@ -116,6 +113,7 @@
              Signal.read_signal(i);
              Data.serial_stream( out->RPM, out->pos, out->load_state, out->P );
          }
+         
          out->RPM        = Signal.frequency_meter()*10;  // RPM_TURBINE = 60* (F(Hz)/(Number_of_poles = 6))
          out->pos        = Pitch.pitch_control( out->RPM, out->prev_RPM );
          out->R          = Load.relay( out->load_state );
@@ -124,7 +122,7 @@
          control_sample_rate_regulation();
          
 
-         Data.Display     ( out->RPM, out->pos, out->load_state, out->P );
+         Data.Display     ( out->RPM, out->pos, out->load_state,out->P );
          Data.update_IOT   ( out->RPM, out->pos, out->load_state, out->state);
     }
 
@@ -134,6 +132,7 @@
              Signal.read_signal(i);
              Data.serial_stream( out->RPM, out->pos, out->load_state, out->P );
          }
+         
          out->RPM        = Signal.frequency_meter()*10;  // RPM_TURBINE = 60* (F(Hz)/(Number_of_poles = 6))
          out->load_state = round (Load.relay_switch( out->RPM , out->prev_RPM));
          out->R          = Load.relay( out->load_state );
@@ -152,6 +151,7 @@
              Signal.read_signal(i); 
              Data.serial_stream( out->RPM, out->pos, out->load_state, out->P );
          }
+         
          out->RPM        = Signal.frequency_meter()*10;  // RPM_TURBINE = 60* (F(Hz)/(Number_of_poles = 6))
          out->pos        = Pitch.pitch_stop();
          out->load_state = round (Load.relay_switch( out->RPM , out->prev_RPM));
@@ -160,7 +160,7 @@
          out->prev_RPM   = out->RPM;                     //IMPORTANT!!
          control_sample_rate_regulation();
 
-         Data.Display     ( out->RPM, out->pos, out->load_state, out->P );
+         Data.Display     ( out->RPM, out->pos, out->load_state, out->P);
          Data.update_IOT   ( out->RPM, out->pos, out->load_state, out->state);
     }
 
@@ -170,8 +170,8 @@
              Signal.read_signal(i);
              out->pos = Pitch.pitch_IMU();
              Data.serial_stream( out->RPM, out->pos, out->load_state, out->P ); 
-
          }
+         
          out->RPM        = Signal.frequency_meter()*10;  // RPM_TURBINE = 60* (F(Hz)/(Number_of_poles = 6))
          out->load_state = round (Load.relay_switch( out->RPM , out->prev_RPM));
          out->R          = Load.relay( out->load_state );
