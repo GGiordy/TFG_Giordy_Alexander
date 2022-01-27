@@ -16,7 +16,8 @@
             digitalWrite(opt1_pin,LOW);       //scale = 1 (V <= 1,5V)
             digitalWrite(opt2_pin,HIGH);      //scale = 2 (1,5V <= V <= 3)
     } 
-    
+
+////      Lectura de la señal    
     void Signal::read_signal(int loop_itValue){
          vReal[loop_itValue] = ((analogRead(analog_pin))* (3.3 / 1024.0) - VOffset) / scale;
          vImag[loop_itValue] = 0;
@@ -26,7 +27,8 @@
          while ((micros()-loop_time1)<sample_period);
          loop_time1 = micros();        
     }
-    
+
+////      Se controla la ganancia de entrada con los optoacopladores     
     void Signal::scale_value(double data){
          if (scale == 1 && data >= 1.5){
             digitalWrite(opt1_pin,LOW);
@@ -39,7 +41,8 @@
             scale = 1;                    //Vread=Vin
         }
     }
-    
+
+////      Se obtiene la potencia generada      
     double Signal::power_meter(double resistance_value){
            V_RMS = maior / sqrt(2); 
            power = pow(V_RMS,2) * 1e3 / resistance_value;   // power in mW 

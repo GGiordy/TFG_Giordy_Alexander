@@ -44,7 +44,7 @@
       const double Pitch_D_gain = 0.03;
       const double Pitch_I_gain = 0.01;
       const double pos_max      = 90.0;
-      const double pos_optim    = 80.0;   
+      const double pos_optim    = 80.0;   // Posición óptima del servo para el ángulo óptimo de trabajo 
       const double pos_min      = 45.0; 
       double local_pos          = pos;
       double ymin               = 0.25; 

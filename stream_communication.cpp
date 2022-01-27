@@ -78,6 +78,7 @@
     }
 
 
+////      Se imprime la información por la pantalla  
     void Data::Display ( double RPM_wind, double pos_wind, int load_state_wind, double power_wind ) {
          display.clearDisplay();
         
@@ -98,7 +99,7 @@
          display.display();
       }
 
-
+////      Se realiza la comunicación puerto-serie
       void Data::serial_stream (double RPM_stream, double pos_stream, int load_state_stream, double power_stream){
           
                RPM_value.number   = float(RPM_stream);
